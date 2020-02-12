@@ -15,6 +15,8 @@ feature {NONE} -- Initialization
 
     make
             -- Running the game.
+        local
+            temp:JOUEUR
         do
             -- Your code here.
         end
