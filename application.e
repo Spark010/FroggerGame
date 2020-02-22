@@ -7,6 +7,8 @@ note
 
 class
     APPLICATION
+inherit
+	GAME_LIBRARY_SHARED
 
 create
     make
@@ -16,9 +18,13 @@ feature {NONE} -- Initialization
     make
             -- Running the game.
         local
+        	l_moteur:MOTEUR
             temp:JOUEUR
         do
-            -- Your code here.
+        	game_library.enable_video
+            create l_moteur.make
+            l_moteur.lancer
+
         end
 
 end
