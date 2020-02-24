@@ -19,15 +19,38 @@ feature {NONE} -- Initialization
 			--assignation des attributs par 'défault'
 			nom:="Frogger"
 			vie:=3
-			position_grille_x:=0
-			position_grille_y:=0
-			id_sprite_frogger:=0
+			x:=0
+			y:=0
+
 		end
 
-feature --attributs/variables
-	vie: INTEGER_32
-	nom: STRING
-	position_grille_x: INTEGER_32
-	position_grille_y: INTEGER_32
-	id_sprite_frogger: INTEGER_8 --0 rest, 1 crank, 2 jump, 3 land, 4 in water, 5 flat, 6 eaten
+feature --Acces
+	vie:INTEGER
+	nom:STRING --nom du joueur
+	x:INTEGER_32
+		--position vertical de `Current'
+
+	y:INTEGER_32
+		--position horizontal de `Current'
+
+	bouger_haut
+		--on bouge en hautr
+		do
+	   		--ixi
+		end
+
+	bouger_bas
+		do
+	    	--ici
+		end
+
+	bouger_droite
+		do
+	    	--tada
+		end
+
+	bouger_gauche
+		do
+	    	--data
+		end
 end
