@@ -8,23 +8,33 @@ class
 	LILYPADS
 inherit
     ELEMENT_MOBILE
+create
+    make
 
-feature --Accès
-	make
-		local
-		    l_temps_vie:INTEGER_16
+feature --INITIALIZE
+	temps_vie:INTEGER_16
+
+	make(a_x, a_y:INTEGER_32 a_direction:BOOLEAN )
 		do
-		    l_temps_vie := 7000
+		    temps_vie := 40
+		    direction:= a_direction
+			set_delais
+			x:=a_x
+			y:=a_y
+			y_width:=10
+			x_width:=60
+			calculer_x_max (x)
+			calculer_x_min (x)
 		end
 
 feature --utiliser
-	supporter_frogger(l_temps_vie:INTEGER_16) : INTEGER_16
+	supporter_frogger
 		do
-			RESULT := l_temps_vie - 1
-			if l_temps_vie.is_less_equal (0) then
+			temps_vie := temps_vie - 1
+			if temps_vie.is_less_equal (0) then
 			    --on tue frogger
 			    --on ramene a la vie la plante
-			    RESULT := 7000
+			    temps_vie:= 40
 			end
 		end
 

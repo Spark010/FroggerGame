@@ -1,0 +1,15 @@
+frogger notes
+taille Grille 15x15
+taille sprite
+
+frogger = 12x10
+cammion = 27x10
+voitureA(rose jaune bleue) = 15x11
+voitureB(voiture course)=15x14
+voitureC(BULDOSER)= 15x12
+tronA= 30x10 b 60x10 c 40x10
+lily=12x10  x3
+froggerWin=60x60 = taille herbe
+TEMPS = score en unité fps sur 32bit 
+
+

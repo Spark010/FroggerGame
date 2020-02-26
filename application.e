@@ -20,8 +20,8 @@ feature {NONE} -- Initialization
             -- Running the game.
         local
         	l_moteur:MOTEUR
-        	temp:JOUEUR
-            temp2:VOITURES
+        	temp:LILYPADS
+        	temp2:BUCHES
         do
         	game_library.enable_video -- active les fonctionnalités vidéo
         	image_file_library.enable_image (true, false, false) --Active le support des image PNG seulement

@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {MOTEUR}."
+	description: "Summary description for {MOTEUR}.moteur du jeux"
 	author: "Francis Croteau"
 	date: "2020-02-22"
 	revision: "$Revision$"
@@ -14,6 +14,7 @@ create
 
 feature {NONE} -- Initialisation
 	auto:VOITURES
+	joueur:JOUEUR
 	make
 			-- Initialise `Curent'
 
@@ -21,9 +22,9 @@ feature {NONE} -- Initialisation
 			l_builder:GAME_WINDOW_RENDERED_BUILDER
 		do
 		    create l_builder
-			create auto
-			auto.make
-		    l_builder.set_dimension (200, 300)
+			create auto.make(0, 150, 1, TRUE)
+			create joueur.make
+		    l_builder.set_dimension (224, 256)
 		    l_builder.set_title ("Frogger")
 		    l_builder.enable_must_renderer_synchronize_update
 		    fenetre := l_builder.generate_window
@@ -50,20 +51,17 @@ feature {NONE} --Implémentation
 		--A chaque tour de la boucle de la librairie de jeu
 		local
 		    l_couleur:GAME_COLOR
-		    l_compteur_delais_bouger:INTEGER_16
-		    pos_x:INTEGER_32
 
 		do
-			pos_x := auto.get_x
 			create l_couleur.make_rgb (0, 0, 0)
 		    fenetre.renderer.drawing_color :=l_couleur
 		    fenetre.renderer.clear
 		    create l_couleur.make_rgb (0, 0, 255)
 		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (auto.get_x, 10, 20, 10)
+		    fenetre.renderer.draw_filled_rectangle (auto.get_x, auto.get_y, auto.get_x_width, auto.get_y_width)
 		    create l_couleur.make_rgb (0, 255, 0)
 		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (100, 200, 5, 5)
+		    fenetre.renderer.draw_filled_rectangle (joueur.get_x, joueur.get_y, joueur.get_x_width, joueur.get_y_width)
 		    fenetre.renderer.present
 		    auto.bouger_voiture
 		end

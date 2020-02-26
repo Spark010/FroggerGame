@@ -8,37 +8,50 @@ class
 	VOITURES
 inherit
 	ELEMENT_MOBILE
-	feature
-			position_y:INTEGER_32 -- une fois assigné elle ne doit pas changer le temps du niveau
-	   		type:BOOLEAN -- true=auto false=camion
-	   		couleur:INTEGER_8 -- 1=rouge 2=bleue 3=vert
 
+create
+    make
 
+feature
+   		type:INTEGER_8 --1=voiture 2=courseA 3=courseB 4=buldoser 5=cammion
 
-		make
-	    	do
+	make(a_x, a_y:INTEGER_32 a_type:INTEGER_8 a_direction:BOOLEAN)
+	   	do
+	   	    type := a_type
+	   	    x := a_x
+	   	    y := a_y
+	   	    direction := a_direction
+	   	    x_width := 27
+	   	    y_width :=15
+	   	    calculer_x_max (x)
+	   	    calculer_x_min (x)
+	   	    set_delais
+	   	   
+	   	end
 
-	    	    position_y := 150
-	    	    type := TRUE
-	    	    couleur := 2
-	    	    x := 0
-	    	    x_min := -20
-	    	    x_max := 200
-	    	    delais_deplacement := 0
-	    	    delais_deplacement_max :=  2
-	    	    direction := TRUE
+	get_x:INTEGER_32
+		do
+			RESULT := x
+		end
+	get_y:INTEGER_32
+		do
+			RESULT := y
+		end
 
+	get_y_width:INTEGER_32
+		do
+			RESULT := y_width
+		end
 
-	    	end
+	get_x_width:INTEGER_32
+		do
+			RESULT := x_width
+		end
 
-		get_x:INTEGER_32
-			do
-				RESULT := x
-			end
-
-	    bouger_voiture
-			do
-			    bouger
-			end
+    bouger_voiture
+		do
+			--appele la fonction bouger de ELEMENT_MOBILE pour déplacer la voiture
+		    bouger
+		end
 
 end
