@@ -10,48 +10,45 @@ inherit
 	ELEMENT_MOBILE
 
 create
-    make
+    make_default
 
-feature
-   		type:INTEGER_8 --1=voiture 2=courseA 3=courseB 4=buldoser 5=cammion
-
-	make(a_x, a_y:INTEGER_32 a_type:INTEGER_8 a_direction:BOOLEAN)
+feature {NONE} --make
+	make_default(a_x, a_y:INTEGER_32; a_direction, a_est_camion:BOOLEAN)
 	   	do
-	   	    type := a_type
 	   	    x := a_x
 	   	    y := a_y
+	   	    if est_camion then
+	   	        --assigne sprite camion
+	   	        longeur:=55
+	   	    else
+	   	        ---assigne sprite voiture
+	   	        longeur:=27
+	   	    end
 	   	    direction := a_direction
-	   	    x_width := 27
-	   	    y_width :=15
-	   	    calculer_x_max (x)
-	   	    calculer_x_min (x)
+	   	    largeur :=15
 	   	    set_delais
-	   	   
 	   	end
+feature --acces
+	x:INTEGER_32
+	y:INTEGER_32
+	longeur:INTEGER_32
+	largeur:INTEGER_32
+	direction:BOOLEAN
+	est_camion:BOOLEAN
 
-	get_x:INTEGER_32
-		do
-			RESULT := x
-		end
-	get_y:INTEGER_32
-		do
-			RESULT := y
-		end
-
-	get_y_width:INTEGER_32
-		do
-			RESULT := y_width
-		end
-
-	get_x_width:INTEGER_32
-		do
-			RESULT := x_width
-		end
-
-    bouger_voiture
+feature --Implements
+    deplacer
 		do
 			--appele la fonction bouger de ELEMENT_MOBILE pour déplacer la voiture
-		    bouger
+		    x:=bouger(x, direction)
 		end
 
+	set_x_spawn(a_taille_fenetre_x:INTEGER_32)
+		do
+			if direction then
+				x:=0-longeur
+			else
+			    x:=a_taille_fenetre_x
+			end
+		end
 end

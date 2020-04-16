@@ -1,67 +1,45 @@
 note
-	description: "Summary description for {ELEMENT_MOBILE}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	description: "Classe qui s'occupe du mouvement des éléments mobiles du jeux."
+	author: "Francis Croteau"
+	date: "2020-03-2"
+	revision: "01"
 
 deferred class
 	ELEMENT_MOBILE
 
-feature {NONE} -- Implementation
-	x:INTEGER_32
-	x_min:INTEGER_32
-	x_max:INTEGER_32
-	x_width:INTEGER_32 --largeur
-	y:INTEGER_32
-	y_min:INTEGER_32
-	y_max:INTEGER_32
-	y_width:INTEGER_32 --hauteur
-	direction:BOOLEAN
+feature -- Implementation
 	delais_deplacement:INTEGER_16
 	delais_deplacement_max:INTEGER_16
 
-
-		deplacer
-			--effectue le déplacement de `Current' sur l'axe des `x'
-		do
-			if direction then
-				--vers la droite
-		   		x := x+10
-		    	if x > x_max then
-		        	x := x_min
-		    	end
-		    else
-		    	--vers la gauche
-		    	x := x-10
-		    	if x < x_min then
-		    		x := x_max
-		    	end
-			end
-		end
-
-	bouger
+	bouger(a_x:INTEGER_32 a_direction:BOOLEAN):INTEGER_32
 		--s'occupe de géré le déplacement sur son interval
+		local
+		l_x:INTEGER_32
+		--code
 		do
-		    delais_deplacement := delais_deplacement+1
+			l_x := a_x --pour le résultat si rien ne change
+		    delais_deplacement := delais_deplacement + 1
+		    --si le délais du déplacement est attein on déplace selon la direction
 		    if delais_deplacement > delais_deplacement_max then
-		       deplacer
-		       delais_deplacement := 0
+		    	if a_direction then
+					--vers la droite
+		   			l_x := a_x + 1
+		   			--on ramene le compteur de délais à 0 car on s'est déplacer
+		   			delais_deplacement := 0
+		    	else
+		    		--vers la gauche
+		   			l_x := a_x - 1
+		   			--on ramene le compteur de délais à 0  car on s'est déplacer
+		   			delais_deplacement := 0
+		    	end
 		    end
+		    RESULT := l_x
 		end
 
 	set_delais
+		--assigne les valeurs par défault du délais de déplacement
 		do
-		    delais_deplacement:=0
-		    delais_deplacement_max:=50
-		end
-
-	calculer_x_max(a_x:INTEGER_32)
-		do
-			x_max := 256+x_width
-		end
-
-	calculer_x_min(a_x:INTEGER_32)
-		do
-			x_min := 0-x_width
+		    delais_deplacement := 0
+		    delais_deplacement_max := 2
 		end
 end

@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {BUCHES}."
+	description: "Class des bûches de frogger ."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -9,51 +9,70 @@ class
 inherit
     ELEMENT_MOBILE
 create
-    make
+    make_defaut
 
-feature --constructeur
-	make(a_longeur, a_x, a_y:INTEGER_8)
-		--crée une instance d'une buche selon  la longeur (0=courte, 1=moyen, 3=long)
-		--valeurs de base
+feature --Implentation
+	x:INTEGER_32
+	y:INTEGER_32
+	longeur:INTEGER_32
+	largeur:INTEGER_32
+	direction:BOOLEAN
+
+feature --constructors
+
+	make_defaut(a_x, a_y:INTEGER_32 a_direction:BOOLEAN)
+		--crée la buche par defaut
 		do
-			direction:= true
-			x:=a_x
-			y:=a_y
-			y_width:=10
-			set_delais
-		    if a_longeur = 0 then
-		    	---faire la petite buche
-		    	make_petite
-		    elseif a_longeur = 1 then
-		    	-- fair la buche moyenne
-		    	make_moyenne
-		    elseif a_longeur = 3 then
-		        --faire la grosse buche
-		        make_grosse
-		    else
-		    	--faire la petite buche
-		    	make_grosse
-		    end
-		    calculer_x_max (x)
-		    calculer_x_min (x)
-
+		    x:=a_x
+		    y:=a_y
+		    largeur:=15
+		    direction:=a_direction
+		    make_petite
+		    set_delais
 		end
+
 
 	make_petite
 		--crée une petite buche
 		do
-			x_width:=30
+			longeur:=30
+			--1 sprite section bout_a
+			--1 sprite section centre
+			--1 sprite section bout_b
 		end
 
-	make_moyenne
+		make_moyenne
 		--crée une moyenne buche
 		do
-		    x_width:=40
+		    longeur:=60
+		    --1 sprite section bout_a
+		    --2 sprite section centre
+		    --1 sprite section bout_b
 		end
-	make_grosse
+
+		make_grosse
 		--crée une grosse buche
 		do
-		    x_width:=60
+		    longeur:=90
+		    --1 sprite section bout_a
+		    --3 sprite section centre
+		    --1 sprite section bout_b
+		end
+
+feature --Implements
+	deplacer
+		do
+			--appele la fonction bouger de ELEMENT_MOBILE pour déplacer la bûche
+		    x:=bouger(x, direction)
+		end
+
+	set_x_spawn(a_taille_fenetre_x:INTEGER_32)
+		do
+			if direction then
+				x:=0-longeur
+			else
+			    x:=a_taille_fenetre_x
+			end
 		end
 
 end

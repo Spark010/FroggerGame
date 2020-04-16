@@ -1,5 +1,5 @@
 note
-    description : "A game created in Eiffel."
+    description : "Frogger pour Game2 sur le langague Eiffel."
     author      : "Francis Croteau"
     generator   : "Eiffel Game2 Project Wizard"
     date        : "2020-02-03 03:36:46.066 +0000"
@@ -20,8 +20,6 @@ feature {NONE} -- Initialization
             -- Running the game.
         local
         	l_moteur:MOTEUR
-        	temp:LILYPADS
-        	temp2:BUCHES
         do
         	game_library.enable_video -- active les fonctionnalités vidéo
         	image_file_library.enable_image (true, false, false) --Active le support des image PNG seulement
