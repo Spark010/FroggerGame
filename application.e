@@ -8,8 +8,9 @@ note
 class
     APPLICATION
 inherit
-	GAME_LIBRARY_SHARED --librairie standard pour le jeuc
+	GAME_LIBRARY_SHARED --librairie standard pour le jeux
 	IMG_LIBRARY_SHARED --pour utiliser `image_file_library'
+	TEXT_LIBRARY_SHARED --pour utiliser du texte surfacer dans la fênetre de jeux
 
 create
     make
@@ -22,6 +23,7 @@ feature {NONE} -- Initialization
         	l_moteur:MOTEUR
         do
         	game_library.enable_video -- active les fonctionnalités vidéo
+        	text_library.enable_text --active le support du texte
         	image_file_library.enable_image (true, false, false) --Active le support des image PNG seulement
             create l_moteur.make --crée le moteur du jeux
             l_moteur.lancer --lance le moteur

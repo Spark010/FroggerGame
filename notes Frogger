@@ -26,11 +26,11 @@ scores
 		1 =>
 	1 ligne camion <= 195
 	1 ligne sauve (gazon) 180
-	1 ligne lilipad => 165
+	1 ligne Tortue => 165
 	2 ligne buche 150,135
 		=> fast
 		=>slow
-	1 ligne lilypad <= 120
+	1 ligne TORTUE <= 120
 	1 ligne buche => 105
 	5 maison 90
 

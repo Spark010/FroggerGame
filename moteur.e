@@ -2,7 +2,7 @@ note
 	description: "Moteur du jeux"
 	author: "Francis Croteau"
 	date: "2020-02-22"
-	revision: "$Revision$"
+	revision: "$2020-05-15"
 
 class
 	MOTEUR
@@ -11,20 +11,26 @@ inherit
 
 create
 	make
-feature {NONE} --Attributs
+feature --Attributs
 	--attributs de la classe Moteur
 	taille_fenetre_x:INTEGER_32
+	--taille de la fênetre en pixel sur l'axe horizontale
 	taille_fenetre_y:INTEGER_32
+	--taille de la fênetre en pixel sur l'axe verticale
 	zone_maximal_y:INTEGER_32
+	--position vertical maximal (dans le bas de la fênetre) de la zone de jeux (utiliser pour contenir le joueur)
 	zone_minimal_y:INTEGER_32
-	--route:LIST[VOITURES]
-	--riviere1:LIST[BUCHES]
-	--riviere2:LIST[LILYPADS]
-	auto:VOITURES
+	--position verticale mininal (dans le haut de la fênetre) de la zone de jeux (utiliser pour contenir le joueur)
+	route: LIST[VOITURES]
+	--liste d'objet sur la route (inclus les voutures, cammions)
+	riviere1:LIST[BUCHES]
+	--liste d'objets sur la rivière partie bûches
 	joueur:JOUEUR
-	tortue:TORTUES
- 	buche:BUCHES
-	--autos:[VOITURES]
+	--objet du joueur (la grenouille)
+	riviere2:LIST[TORTUES]
+	--liste des objets tortues sur la rivière
+ 	paysage:PAYSAGE --fond d'écrant du jeux
+
 
 feature {NONE} -- Initialisation
 	make
@@ -32,75 +38,25 @@ feature {NONE} -- Initialisation
 
 		local
 			l_builder:GAME_WINDOW_RENDERED_BUILDER
-			l_i:INTEGER_32
+			l_color:GAME_COLOR
 		do
 			--on assigne la valeur de la fenêtre. on simule une borne d'arcade a une resolution légèrement modifier
 			taille_fenetre_x:=300
 		    taille_fenetre_y:=330
 		    zone_minimal_y:=90
 		    zone_maximal_y:=270
-		    --création d'objet spécifique au jeux
-			create auto.make_default(0, 255, false, FALSE)
-			create joueur.make("frogger")
-			create tortue.make (4, 165, FALSE)
-			create buche.make_defaut(0, 150, TRUE)
-			--voirutres 255,240,225,210
---			l_i:=4 --nombre de voiture par ligne
---			from
---				l_i:=4
---			until
---			    l_i=-1
---			loop
---			    create auto.make_default (l_i*27+30, 255, FALSE, FALSE)
---			    route.append (auto)
---			    l_i:=l_i-1
---			end
---			l_i:=4
---			from
---			until
---				l_i=-1
---			loop
---			    create auto.make_default (l_i*27+30+90, 240, FALSE, FALSE)
---			    route.append (auto)
---			    l_i:=l_i-1
---			end
---			l_i:=4
---			from
---			until
---			    l_i=-1
---			loop
---			    create auto.make_default (l_i*27+30+60, 225, FALSE, FALSE)
---			    route.append (auto)
---			    l_i:=l_i-1
---			end
---			l_i:=4
---			from
---			until
---				l_i=-1
---			loop
---			    create auto.make_default (l_i*27+30+30, 210, TRUE, FALSE)
---			    route.append (auto)
---			    l_i:=l_i-1
---			end
---			l_i:=3
---			from
---			until
---			    l_i=-1
---			loop
---			    create auto.make_default (l_i*55+30, 195, FALSE, TRUE)
---			    route.append (auto)
---			    l_i:=l_i-1
---			end
-			--cammion 195
-			--tortue 165,120
-			--buche 150,135, 105
-
-			--création de la fênetre
+			--création de la fênetre avec rendue sycroniser
 			create l_builder
 		    l_builder.set_dimension (taille_fenetre_x, taille_fenetre_y)
 		    l_builder.set_title ("Frogger")
 		    l_builder.enable_must_renderer_synchronize_update
 		    fenetre := l_builder.generate_window
+		    --création d'objet spécifique au jeux
+		    create paysage.make (fenetre.renderer) --crée le rendu du fond de la fênetre
+		    create joueur.make("frogger", fenetre.renderer)
+		    route := populer_route(fenetre.renderer)
+		    riviere1 := populer_buches(fenetre.renderer)
+		    riviere2 := populer_tortues(fenetre.renderer)
 		end
 
 feature --Acces
@@ -108,10 +64,12 @@ feature --Acces
 	lancer
 			--Démare le programme
 		do
+			--on lance les agents
 			game_library.quit_signal_actions.extend (agent on_quit)
 			game_library.iteration_actions.extend (agent on_interation)
 			fenetre.key_pressed_actions.extend (agent on_key_pressed)
 			fenetre.key_released_actions.extend (agent on_key_released)
+			--si on supporte l'accélération graphique on lance le jeux dans ce mode sinon on utilise le de dessin logiciel
 			if fenetre.renderer.driver.is_software_rendering_supported then
 		    	game_library.launch_no_delay
 		    else
@@ -124,100 +82,107 @@ feature {NONE} --Implémentation
 
 	on_interation(a_timestamp:Natural)
 		--A chaque tour de la boucle de la librairie de jeu
-		local
-		    l_couleur:GAME_COLOR
-		    l_couleur_a:GAME_COLOR
-		    l_couleur_b:GAME_COLOR
 
 		do
-			--rendu du fond, comme c'est un jeux d'arcade classique noir est utiliser
-			create l_couleur.make_rgb (0, 0, 0)
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.clear
-		    --dessin des zones
-		    create l_couleur_a.make_rgb (100, 100, 100)
-		    create l_couleur_b.make_rgb (255, 255, 255)
-		    create l_couleur.make_rgb (0,150,0)
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (0, 60, taille_fenetre_y, 60)
-		    fenetre.renderer.draw_filled_rectangle (0, 270, taille_fenetre_y, 15)
-		    fenetre.renderer.draw_filled_rectangle (0, 180, taille_fenetre_y, 15)
-		    fenetre.renderer.draw_filled_rectangle (0, 90, taille_fenetre_y, 15)
-		    create l_couleur.make_rgb (150,150,150)
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (0, 195, taille_fenetre_y, 75)
-		    create l_couleur.make_rgb (0,0,85)
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (0, 105, taille_fenetre_y, 75)
+			--dessiner_scene
+			--rendue de la scène
+			fenetre.renderer.draw_texture (paysage, 0, 0)
+			--on déplace et restrein tout dans la zone de jeux
+			deplacer_tout
+			contenir_tout
+			--on redessine les objets
+			dessiner_objets
+		    fenetre.renderer.present
+		    --fenetre.surface.draw_surface (texte_surface, 300, 315)
 
-		    --mouvement Temporaire
-		    auto.deplacer
-		    buche.deplacer
-		    tortue.deplacer
+		end
+
+	deplacer_tout
+		--fonction qui parcour les listes pour déplacer chaque objet.
+		do
+		    across route as vehicule loop
+		    	vehicule.item.deplacer
+		    end
+		    across riviere1 as buche loop
+		    	buche.item.deplacer
+		    end
+		    across riviere2 as tortue loop
+		        tortue.item.deplacer(fenetre.renderer)
+		    end
+		    joueur.bouger
+		end
+
+	contenir_tout
+		--fait appelle aux fonctions des objets pour les contenir dans la zone de jeux
+		do
 		    contenir_Voitures
 		    contenir_Buches
 		    contenir_Tortues
-		    joueur.bouger
-		    contenir_frogger
-		    --voiture_test
-		    create l_couleur.make_rgb (0, 0, 255)
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (auto.x, auto.y, auto.longeur, auto.largeur)
-		    --buche_test
-		    create l_couleur.make_rgb (170, 42, 42)
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (buche.x, buche.y, buche.longeur, buche.largeur)
-		    --Tortue_test
-		    if tortue.etat then
-		        create l_couleur.make_rgb (0, 255, 150)
-		    else
-		    	create l_couleur.make_rgb (150, 255, 0)
-		    end
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (tortue.x, tortue.y, tortue.longeur, tortue.largeur)
-		    --Joueur_test
-		    create l_couleur.make_rgb (0, 255, 0)
-		    fenetre.renderer.drawing_color :=l_couleur
-		    fenetre.renderer.draw_filled_rectangle (joueur.x, joueur.y, joueur.longeur, joueur.largeur)
-		    fenetre.renderer.present
-		    --TODO: faire une fonction pour contenir les `ELEMENTS_MOBILE'
-		    --TODO: faire une fonction pour détecter les colision du `JOUEUR'
-		    --TODO: faire une génération des différents éléments
+		    contenir_joueur
+		end
 
+	dessiner_objets
+		local
+		    l_couleur:GAME_COLOR
+		do
+			--la rue
+			across route as vehicule loop
+		    	fenetre.renderer.draw_texture(vehicule.item, vehicule.item.x, vehicule.item.y)
+		    end
+		    --la rivière1 (les bûches)
+		    across riviere1 as buche loop
+		    	fenetre.renderer.draw_texture(buche.item, buche.item.x, buche.item.y)
+		    end
+		    --la rivière2 (les tortues)
+		    across riviere2 as tortue loop
+		    	fenetre.renderer.draw_texture(tortue.item, tortue.item.x, tortue.item.y)
+		    end
+		    fenetre.renderer.draw_texture(joueur, joueur.x, joueur.y)
+		    create l_couleur.make_rgb (0, 255, 0)
+		    fenetre.renderer.drawing_color := l_couleur
+		    fenetre.renderer.draw_filled_rectangle (150-joueur.barre_temps, 315, joueur.barre_temps, 15)
 		end
 
 	contenir_Voitures
 		--Permet de contenir la voiture dans la zone de jeux
 		do
-		    if auto.x > taille_fenetre_x then
-		        auto.set_x_spawn(taille_fenetre_x)
-		    elseif auto.x < 0-auto.longeur then
-		    	auto.set_x_spawn(taille_fenetre_x)
-		    end
+			across route as vehicule loop
+				--pour chaque véhicule sur la route si un véhicule ressort par la droite on le remet a gauche
+				-- on fait l'inverse si le véhicule est de l'autre coté
+		    	if vehicule.item.x > taille_fenetre_x then
+		       	 vehicule.item.set_x_spawn(taille_fenetre_x)
+		    	elseif vehicule.item.x < 0-vehicule.item.longeur then
+		    		vehicule.item.set_x_spawn(taille_fenetre_x)
+		   		end
+		   	end
 		end
 
 
 	contenir_Tortues
 		--Permet de contenir la tortue dans la zone de jeux
 		do
-		    if tortue.x > taille_fenetre_x then
-		        tortue.set_x_spawn(taille_fenetre_x)
-		    elseif tortue.x < 0-tortue.longeur then
-		    	tortue.set_x_spawn(taille_fenetre_x)
+			across riviere2 as tortue loop
+		    	if tortue.item.x > taille_fenetre_x then
+		        	tortue.item.set_x_spawn(taille_fenetre_x)
+		    	elseif tortue.item.x < 0-tortue.item.longeur then
+		    		tortue.item.set_x_spawn(taille_fenetre_x)
+		    	end
 		    end
 		end
 
 	contenir_Buches
 		--Permet de contenir la buche dans la zone de jeux
 		do
-		    if buche.x > taille_fenetre_x then
-		        buche.set_x_spawn(taille_fenetre_x)
-		    elseif buche.x < 0-buche.longeur then
-		    	buche.set_x_spawn(taille_fenetre_x)
+			across riviere1 as buche loop
+		    	if buche.item.x > taille_fenetre_x then
+		       		buche.item.set_x_spawn(taille_fenetre_x)
+		    	elseif buche.item.x < 0-buche.item.longeur then
+		    		buche.item.set_x_spawn(taille_fenetre_x)
+		    	end
 		    end
 		end
 
-	contenir_frogger
+	contenir_joueur
 		--fonction qui permet de contenir le joueur dans la zone de jeux
 		do
 		    if joueur.x > taille_fenetre_x-joueur.largeur then
@@ -233,6 +198,142 @@ feature {NONE} --Implémentation
 		    end
 		end
 
+
+    populer_route(a_renderer:GAME_RENDERER):LIST[VOITURES]
+    	--fonction qui génère les véhicules dans la rue
+    	--//TODO: creer méthode de calcul random pour la position plus un random avec range
+    	local
+    		l_i:INTEGER_32
+    		l_auto:VOITURES --utiliser pour la génération
+    		-- compteur d'itération pour les boucles
+    	do
+    	    create {ARRAYED_LIST[VOITURES]}route.make (18)
+    		--voitures 255,240,225,210
+    		from
+    			l_i:=3
+    		until
+    		    l_i=-1
+    		loop
+    		    --create l_auto.make_default (l_i*27+30+30*l_i, 255, FALSE, FALSE, fenetre.renderer)
+    		    --route.extend(l_auto)
+    		    l_i:=l_i-1
+    		end
+    		from
+    			l_i:=4
+    		until
+    			l_i=-1
+    		loop
+    		    create l_auto.make_default (l_i*27+30*l_i+90, 240, FALSE, FALSE, fenetre.renderer)
+    		    route.extend(l_auto)
+    		    l_i:=l_i-1
+    		end
+    		from
+    			l_i:=4
+    		until
+    		    l_i=-1
+    		loop
+    		    create l_auto.make_default (l_i*27+30*l_i+60, 225, FALSE, FALSE, fenetre.renderer)
+    		    route.extend(l_auto)
+    		    l_i:=l_i-1
+    		end
+    		from
+    			l_i:=4
+    		until
+    			l_i=-1
+    		loop
+    		    create l_auto.make_default (l_i*27+30*l_i+30, 210, TRUE, FALSE, fenetre.renderer)
+    		    route.extend(l_auto)
+    		    l_i:=l_i-1
+    		end
+    		from
+    			l_i:=3
+    		until
+    		    l_i=-1
+    		loop
+    		    create l_auto.make_default (l_i*55+90*l_i+60, 195, FALSE, TRUE, fenetre.renderer)
+    		    route.extend(l_auto)
+    		    l_i:=l_i-1
+    		end
+    		RESULT := route
+		end
+
+
+    populer_buches(a_renderer:GAME_RENDERER):LIST[BUCHES]
+    	--fonction qui génère les buches dans la rue
+    	--//TODO: creer méthode de calcul random pour la position plus un random avec range
+    	local
+    		l_i:INTEGER_32
+    		l_tron:BUCHES --utiliser pour la génération
+    		-- compteur d'itération pour les boucles
+
+    	do
+    	    create {ARRAYED_LIST[BUCHES]}riviere1.make (18)
+    		--buche 150,135, 105
+			--=> fast
+			--=>slow
+			--1 ligne buche => 105
+    		from
+    			l_i:=1
+    		until
+    		    l_i=-2
+    		loop
+    		    create l_tron.make_defaut(188*l_i+34, 150, false, true, TRUE, fenetre.renderer)
+    		    riviere1.extend(l_tron)
+    		    l_i:=l_i-1
+    		end
+    		from
+    			l_i:=2
+    		until
+    			l_i=-1
+    		loop
+    		    create l_tron.make_defaut(66*l_i+55, 135, true, false, TRUE, fenetre.renderer)
+    		    riviere1.extend(l_tron)
+    		    l_i:=l_i-1
+    		end
+    		from
+    			l_i:=3
+    		until
+    		    l_i=-1
+    		loop
+    		    create l_tron.make_defaut(76*l_i+88, 105, false, false, TRUE, fenetre.renderer)
+    		    riviere1.extend(l_tron)
+    		    l_i:=l_i-1
+    		end
+    		RESULT := riviere1
+		end
+
+	populer_tortues(a_renderer:GAME_RENDERER):LIST[TORTUES]
+    	--fonction qui génère les buches dans la rue
+    	--tortue 165,120
+    	--//TODO: creer méthode de calcul random pour la position plus un random avec range
+    	local
+    		l_i:INTEGER_32
+    		l_tortue:TORTUES --utiliser pour la génération
+    		-- compteur d'itération pour les boucles
+
+    	do
+    	    create {ARRAYED_LIST[TORTUES]}riviere2.make (18)
+    		--tortue 165,120
+    		from
+    			l_i:=1
+    		until
+    		    l_i=-2
+    		loop
+    		    create l_tortue.make (48*l_i+13, 165, FALSE, fenetre.renderer)
+    		    riviere2.extend(l_tortue)
+    		    l_i:=l_i-1
+    		end
+    		from
+    			l_i:=2
+    		until
+    			l_i=-1
+    		loop
+    		    create l_tortue.make (87*l_i+56, 120, FALSE, fenetre.renderer)
+    		    riviere2.extend(l_tortue)
+    		    l_i:=l_i-1
+    		end
+    		RESULT := riviere2
+		end
 
 
 
@@ -256,7 +357,6 @@ on_key_pressed(a_timestamp: NATURAL_32; a_key_event: GAME_KEY_EVENT)
 					joueur.bouger_bas
 				end
 			end
-
 		end
 
 	on_key_released(a_timestamp: NATURAL_32; a_key_event: GAME_KEY_EVENT)
@@ -264,9 +364,9 @@ on_key_pressed(a_timestamp: NATURAL_32; a_key_event: GAME_KEY_EVENT)
 		do
 			if not a_key_event.is_repeat then		-- I don't know if a key release can repeat, but you never know...
 				if a_key_event.is_right then
-					--maryo.stop_right
+					--//TODO
 				elseif a_key_event.is_left then
-					--maryo.stop_left
+					--//TODO
 				end
 			end
 		end
