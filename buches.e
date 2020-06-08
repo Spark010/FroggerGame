@@ -2,7 +2,6 @@ note
 	description: "Class des bûches de frogger ."
 	author: "Francis Croteau"
 	date: "2020-02-22"
-	revision: "2020-05-16"
 
 class
 	BUCHES
@@ -31,6 +30,8 @@ feature --Implentation
 	--indique si la buche est de taille moyenne
 	est_grosse:BOOLEAN
 	--indique si la buche est de grande taille
+	en_colision:BOOLEAN
+	--indique si le `JOUEUR' est en colision avec `current'
 
 feature --constructors
 
@@ -45,6 +46,7 @@ feature --constructors
 		    est_moyenne:=a_est_moyenne
 		    largeur:=15
 		    direction:=a_direction
+		    en_colision := false
 		    if (est_grosse) then
 		    	longeur:=90
 		    	create l_image.make ("buche_g.png")

@@ -2,7 +2,6 @@ note
 	description: "Moteur du jeux"
 	author: "Francis Croteau"
 	date: "2020-02-22"
-	revision: "$2020-05-15"
 
 class
 	MOTEUR
@@ -21,7 +20,7 @@ feature --Attributs
 	--position vertical maximal (dans le bas de la fênetre) de la zone de jeux (utiliser pour contenir le joueur)
 	zone_minimal_y:INTEGER_32
 	--position verticale mininal (dans le haut de la fênetre) de la zone de jeux (utiliser pour contenir le joueur)
-	route: LIST[VOITURES]
+	route: LIST[VEHICULES]
 	--liste d'objet sur la route (inclus les voutures, cammions)
 	riviere1:LIST[BUCHES]
 	--liste d'objets sur la rivière partie bûches
@@ -29,7 +28,16 @@ feature --Attributs
 	--objet du joueur (la grenouille)
 	riviere2:LIST[TORTUES]
 	--liste des objets tortues sur la rivière
- 	paysage:PAYSAGE --fond d'écrant du jeux
+ 	paysage:PAYSAGE
+ 	--fond d'écrant du jeux
+ 	texture_texte_nom:TEXT_TEXTURE
+ 	--le nom du `JOUEUR' sous forme de texture
+ 	texture_texte_temps:TEXT_TEXTURE
+ 	--texture du texte "TEMPS" afficher en bas dans le coint
+ 	texture_texte_score:TEXT_TEXTURE
+ 	--texture du score de `JOUEUR'
+ 	list_vie:LIST[BADGE_VIE]
+ 	--liste des badge de vie de `JOUEUR'
 
 
 feature {NONE} -- Initialisation
@@ -38,7 +46,6 @@ feature {NONE} -- Initialisation
 
 		local
 			l_builder:GAME_WINDOW_RENDERED_BUILDER
-			l_color:GAME_COLOR
 		do
 			--on assigne la valeur de la fenêtre. on simule une borne d'arcade a une resolution légèrement modifier
 			taille_fenetre_x:=300
@@ -57,6 +64,10 @@ feature {NONE} -- Initialisation
 		    route := populer_route(fenetre.renderer)
 		    riviere1 := populer_buches(fenetre.renderer)
 		    riviere2 := populer_tortues(fenetre.renderer)
+		    create texture_texte_nom.make(joueur.nom, fenetre.renderer)
+		    create texture_texte_temps.make("TEMPS", fenetre.renderer)
+		    create texture_texte_score.make(joueur.score.out, fenetre.renderer)
+		    mettre_sprite_vie(fenetre.renderer)
 		end
 
 feature --Acces
@@ -84,32 +95,69 @@ feature {NONE} --Implémentation
 		--A chaque tour de la boucle de la librairie de jeu
 
 		do
-			--dessiner_scene
 			--rendue de la scène
 			fenetre.renderer.draw_texture (paysage, 0, 0)
-			--on déplace et restrein tout dans la zone de jeux
-			deplacer_tout
-			contenir_tout
-			--on redessine les objets
-			dessiner_objets
+			if joueur.nombre_vie > 0 then
+				--on déplace et restrein tout dans la zone de jeux
+				deplacer_tout
+				contenir_tout
+				--on redessine les objets
+				dessiner_objets
+				--mise à jour de l'affichage
+				mettre_sprite_vie(fenetre.renderer)
+			end
+			--ici on met la fin du jeux
 		    fenetre.renderer.present
-		    --fenetre.surface.draw_surface (texte_surface, 300, 315)
-
 		end
 
 	deplacer_tout
-		--fonction qui parcour les listes pour déplacer chaque objet.
+		--fonction qui parcour les listes pour déplacer chaque objet et voir si le `JOUEUR' doit mourir.
+		local
+			l_frog_y:INTEGER_32
 		do
+			l_frog_y:=joueur.y-15
+			joueur.peut_sauter(false)
 		    across route as vehicule loop
 		    	vehicule.item.deplacer
+		    	if (joueur.y = vehicule.item.y)  then
+		    	    if (joueur.x >= vehicule.item.x and joueur.x <= vehicule.item.x+vehicule.item.longeur) then
+		    	        joueur.frogger_meurt
+		    	    end
+		    	end
 		    end
 		    across riviere1 as buche loop
 		    	buche.item.deplacer
+		    	if(l_frog_y = buche.item.y) then
+		    		if (joueur.x >= buche.item.x and joueur.x <= buche.item.x+buche.item.longeur) then
+		    			joueur.peut_sauter(true)
+		    		end
+		    	end
+		    	if (joueur.y = buche.item.y) then
+		    		if (joueur.x >= buche.item.x and joueur.x <= buche.item.x+buche.item.longeur) then
+		    			if buche.item.se_deplace then
+		    		joueur.attacher_sur_mobile(buche.item.direction)
+		    	end
+		    		end
+		    	end
 		    end
 		    across riviere2 as tortue loop
 		        tortue.item.deplacer(fenetre.renderer)
+		    	if(l_frog_y = tortue.item.y) then
+		    		if (joueur.x >= tortue.item.x and joueur.x <= tortue.item.x+tortue.item.longeur) then
+		    			joueur.peut_sauter(true)
+		    		end
+		    	end
+		    	if (joueur.y = tortue.item.y)  then
+		    	   	if (joueur.x >= tortue.item.x and joueur.x <= tortue.item.x+tortue.item.longeur) then
+		    		   	if (tortue.item.etat) then
+		    	      		joueur.attacher_sur_mobile(tortue.item.direction)
+		    	      	else
+		    	      		joueur.frogger_meurt
+		    	       	end
+		    	   	end
+		    	end
 		    end
-		    joueur.bouger
+		    joueur.appliquer_action(fenetre.renderer)
 		end
 
 	contenir_tout
@@ -140,7 +188,15 @@ feature {NONE} --Implémentation
 		    fenetre.renderer.draw_texture(joueur, joueur.x, joueur.y)
 		    create l_couleur.make_rgb (0, 255, 0)
 		    fenetre.renderer.drawing_color := l_couleur
-		    fenetre.renderer.draw_filled_rectangle (150-joueur.barre_temps, 315, joueur.barre_temps, 15)
+		    fenetre.renderer.draw_filled_rectangle (269-joueur.barre_temps, 320, joueur.barre_temps, 10)
+		    fenetre.renderer.draw_texture(texture_texte_nom.text_texture, 35, 0)
+		    fenetre.renderer.draw_texture(texture_texte_temps.text_texture, 270, 320)
+		    create texture_texte_score.make(joueur.score.out, fenetre.renderer)
+		    fenetre.renderer.draw_texture (texture_texte_score.text_texture, 35, 15)
+		    --les badges (badge_vie)
+		    across list_vie as badge loop
+		    	fenetre.renderer.draw_texture(badge.item, badge.item.x, badge.item.y)
+		    end
 		end
 
 	contenir_Voitures
@@ -199,61 +255,49 @@ feature {NONE} --Implémentation
 		end
 
 
-    populer_route(a_renderer:GAME_RENDERER):LIST[VOITURES]
+    populer_route(a_renderer:GAME_RENDERER):LIST[VEHICULES]
     	--fonction qui génère les véhicules dans la rue
+    	--voitures 240,225,210
     	--//TODO: creer méthode de calcul random pour la position plus un random avec range
     	local
-    		l_i:INTEGER_32
-    		l_auto:VOITURES --utiliser pour la génération
+    		l_auto:VEHICULES --utiliser pour la génération
     		-- compteur d'itération pour les boucles
     	do
-    	    create {ARRAYED_LIST[VOITURES]}route.make (18)
-    		--voitures 255,240,225,210
-    		from
-    			l_i:=3
-    		until
-    		    l_i=-1
-    		loop
-    		    --create l_auto.make_default (l_i*27+30+30*l_i, 255, FALSE, FALSE, fenetre.renderer)
-    		    --route.extend(l_auto)
-    		    l_i:=l_i-1
-    		end
-    		from
-    			l_i:=4
-    		until
-    			l_i=-1
-    		loop
-    		    create l_auto.make_default (l_i*27+30*l_i+90, 240, FALSE, FALSE, fenetre.renderer)
-    		    route.extend(l_auto)
-    		    l_i:=l_i-1
-    		end
-    		from
-    			l_i:=4
-    		until
-    		    l_i=-1
-    		loop
-    		    create l_auto.make_default (l_i*27+30*l_i+60, 225, FALSE, FALSE, fenetre.renderer)
-    		    route.extend(l_auto)
-    		    l_i:=l_i-1
-    		end
-    		from
-    			l_i:=4
-    		until
-    			l_i=-1
-    		loop
-    		    create l_auto.make_default (l_i*27+30*l_i+30, 210, TRUE, FALSE, fenetre.renderer)
-    		    route.extend(l_auto)
-    		    l_i:=l_i-1
-    		end
-    		from
-    			l_i:=3
-    		until
-    		    l_i=-1
-    		loop
-    		    create l_auto.make_default (l_i*55+90*l_i+60, 195, FALSE, TRUE, fenetre.renderer)
-    		    route.extend(l_auto)
-    		    l_i:=l_i-1
-    		end
+    	    create {ARRAYED_LIST[VEHICULES]}route.make (18)
+    		--pour la ligne 240
+   		    create l_auto.make (20, 240, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+		    create l_auto.make (67, 240, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+		    create l_auto.make (114, 240, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+		    create l_auto.make (161, 240, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+    		--pour la ligne 225
+		    create l_auto.make (114, 225, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+    		create l_auto.make (169, 225, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+    		create l_auto.make (206, 225, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+		    create l_auto.make (273, 225, FALSE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+    		--pour la ligne 210
+		    create l_auto.make (289, 210, TRUE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+    		create l_auto.make (189, 210, TRUE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+		    create l_auto.make (89, 210, TRUE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+		    create l_auto.make (6, 210, TRUE, FALSE, fenetre.renderer)
+		    route.extend(l_auto)
+    		--pour la ligne 195
+    		create l_auto.make (77, 195, FALSE, TRUE, fenetre.renderer)
+		    route.extend(l_auto)
+    		create l_auto.make (140, 195, FALSE, TRUE, fenetre.renderer)
+		    route.extend(l_auto)
+		    create l_auto.make (240, 195, FALSE, TRUE, fenetre.renderer)
+		    route.extend(l_auto)
     		RESULT := route
 		end
 
@@ -262,80 +306,100 @@ feature {NONE} --Implémentation
     	--fonction qui génère les buches dans la rue
     	--//TODO: creer méthode de calcul random pour la position plus un random avec range
     	local
-    		l_i:INTEGER_32
     		l_tron:BUCHES --utiliser pour la génération
-    		-- compteur d'itération pour les boucles
-
     	do
     	    create {ARRAYED_LIST[BUCHES]}riviere1.make (18)
     		--buche 150,135, 105
 			--=> fast
 			--=>slow
-			--1 ligne buche => 105
-    		from
-    			l_i:=1
-    		until
-    		    l_i=-2
-    		loop
-    		    create l_tron.make_defaut(188*l_i+34, 150, false, true, TRUE, fenetre.renderer)
-    		    riviere1.extend(l_tron)
-    		    l_i:=l_i-1
-    		end
-    		from
-    			l_i:=2
-    		until
-    			l_i=-1
-    		loop
-    		    create l_tron.make_defaut(66*l_i+55, 135, true, false, TRUE, fenetre.renderer)
-    		    riviere1.extend(l_tron)
-    		    l_i:=l_i-1
-    		end
-    		from
-    			l_i:=3
-    		until
-    		    l_i=-1
-    		loop
-    		    create l_tron.make_defaut(76*l_i+88, 105, false, false, TRUE, fenetre.renderer)
-    		    riviere1.extend(l_tron)
-    		    l_i:=l_i-1
-    		end
+			--1 ligne buche => 105 grosses
+    		create l_tron.make_defaut(5, 150, false, true, TRUE, fenetre.renderer)
+    		riviere1.extend(l_tron)
+    		create l_tron.make_defaut(134, 150, false, true, TRUE, fenetre.renderer)
+    		riviere1.extend(l_tron)
+    		--pour la ligne 135 moyenne
+		    create l_tron.make_defaut(20, 135, true, false, TRUE, fenetre.renderer)
+		    riviere1.extend(l_tron)
+    		create l_tron.make_defaut(140, 135, true, false, TRUE, fenetre.renderer)
+		    riviere1.extend(l_tron)
+    		--pour la ligne 105 petites
+		    create l_tron.make_defaut(5, 105, false, false, TRUE, fenetre.renderer)
+		    riviere1.extend(l_tron)
+		    create l_tron.make_defaut(80, 105, false, false, TRUE, fenetre.renderer)
+		    riviere1.extend(l_tron)
+		    create l_tron.make_defaut(135, 105, false, false, TRUE, fenetre.renderer)
+		    riviere1.extend(l_tron)
+		    create l_tron.make_defaut(185, 105, false, false, TRUE, fenetre.renderer)
+		    riviere1.extend(l_tron)
+		    create l_tron.make_defaut(285, 105, false, false, TRUE, fenetre.renderer)
+		    riviere1.extend(l_tron)
     		RESULT := riviere1
 		end
 
 	populer_tortues(a_renderer:GAME_RENDERER):LIST[TORTUES]
-    	--fonction qui génère les buches dans la rue
+    	--fonction qui génère les buches dans la rivière
     	--tortue 165,120
     	--//TODO: creer méthode de calcul random pour la position plus un random avec range
     	local
-    		l_i:INTEGER_32
     		l_tortue:TORTUES --utiliser pour la génération
-    		-- compteur d'itération pour les boucles
-
     	do
     	    create {ARRAYED_LIST[TORTUES]}riviere2.make (18)
     		--tortue 165,120
-    		from
-    			l_i:=1
-    		until
-    		    l_i=-2
-    		loop
-    		    create l_tortue.make (48*l_i+13, 165, FALSE, fenetre.renderer)
-    		    riviere2.extend(l_tortue)
-    		    l_i:=l_i-1
-    		end
-    		from
-    			l_i:=2
-    		until
-    			l_i=-1
-    		loop
-    		    create l_tortue.make (87*l_i+56, 120, FALSE, fenetre.renderer)
-    		    riviere2.extend(l_tortue)
-    		    l_i:=l_i-1
-    		end
+    		--ligne 165 première rafte
+		    create l_tortue.make (48, 165, FALSE, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+    		create l_tortue.make (68, 165, FALSE, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    create l_tortue.make (88, 165, FALSE, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    --165 2e rafte
+		    create l_tortue.make (148, 165, FALSE, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    create l_tortue.make (168, 165, FALSE, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    create l_tortue.make (188, 165, FALSE, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+    		--ligne 120 1ere rafte
+		    create l_tortue.make (20, 120, true, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    create l_tortue.make (40, 120, true, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    create l_tortue.make (60, 120, true, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    --- 120 deusieme rafte
+		    create l_tortue.make (120, 120, true, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    create l_tortue.make (140, 120, true, fenetre.renderer)
+		    riviere2.extend(l_tortue)
+		    create l_tortue.make (180, 120, true, fenetre.renderer)
+		    riviere2.extend(l_tortue)
     		RESULT := riviere2
 		end
 
-
+	mettre_sprite_vie(a_renderer:GAME_RENDERER)
+		--place les 7 vie de frogger dans une liste
+		local
+		    l_badge:BADGE_VIE
+		    --un badge montrant le nombre de vie restante pour `JOUEUR'
+		    l_i:INTEGER_32
+		    --itérateur du nombre du `BADGE_VIE'
+		    l_x:INTEGER_32
+		    --position horizontale du `BADGE_VIE'
+		    l_max:INTEGER_32
+		do
+			l_max := joueur.nombre_vie-1
+		    create {ARRAYED_LIST[BADGE_VIE]}list_vie.make (7)
+		    from
+		    l_i:=0
+		    until
+		    l_i = l_max
+		    loop
+		    	l_x:= 1+l_i*12
+		    	create l_badge.make(fenetre.renderer, l_x, 290)
+		    	list_vie.extend(l_badge)
+		    	l_i := l_i+1
+		    end
+		end
 
 
 --- depuis l'exemple « anime surfaced» écrit par Louis Marchant
@@ -346,10 +410,8 @@ on_key_pressed(a_timestamp: NATURAL_32; a_key_event: GAME_KEY_EVENT)
 		do
 			if not a_key_event.is_repeat then		-- Be sure that the event is not only an automatic repetition of the key
 				if a_key_event.is_right then
-					--maryo.go_right(a_timestamp)
 					joueur.bouger_droite
 				elseif a_key_event.is_left then
-					--maryo.go_left(a_timestamp)
 					joueur.bouger_gauche
 				elseif a_key_event.is_up then
 				    joueur.bouger_haut
@@ -364,9 +426,9 @@ on_key_pressed(a_timestamp: NATURAL_32; a_key_event: GAME_KEY_EVENT)
 		do
 			if not a_key_event.is_repeat then		-- I don't know if a key release can repeat, but you never know...
 				if a_key_event.is_right then
-					--//TODO
+					--on fait rien
 				elseif a_key_event.is_left then
-					--//TODO
+					--on fait rien
 				end
 			end
 		end

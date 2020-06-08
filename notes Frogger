@@ -37,3 +37,23 @@ scores
 le temps es indiqué au centre de l'écrant dans la portion basse de l'écrant
 le temps aussi une représentation graphique par une ligne en bas de l'écrant
 
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+= 					roadmap today						=
+=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=
+finir les éléments de jeux
+	ajouter le temps (mourir) --apparament je l'ai fait
+	ajouter compteur de vie +sprite  en cours  --bad implement faut que je le refasse
+	ajouter la vitesse du traffic --vitesse implanter reste a ajouter dans les classes
+	ajouter les maisons -- les placer et ajouter les games_rules
+	ajouter collisions --fait en partie manque la logique des buches + les char sont iffi at best
+	ajouter game_rules frogger on buche
+	ajouter frogger mourir collision char
+	ajouter écran sélection nom
+	ajouter écrant palmares scores
+	ajouter sauvegarde scores
+	ajouter réseau
+	ajouter treads
+	ajouter contracts
+	dernière vérifications
+	faire rétrospective du travail
+	remise final du travail.

@@ -1,102 +1,30 @@
+[Execution recording] Error: rt_dbg_stack_value (dep=6, loc_type=0x1, loc_number=1) -> ERROR ip: type:0xF8000000 rt_type=0x80000000
+
+frogger: PANIC: Unexpected harmful signal (Segmentation violation) ...
 
 frogger: system execution failed.
-Following is the set of recorded exceptions:
+Following is the set of recorded exceptions.
+NB: The raised panic may have induced completely inconsistent information:
 
 -------------------------------------------------------------------------------
 Class / Object      Routine                Nature of exception           Effect
 -------------------------------------------------------------------------------
-ARRAYED_LIST        put @1                 writeable:                   
-<00000000045E4118>  (From CHAIN)           Precondition violated.        Fail
--------------------------------------------------------------------------------
-MOTEUR              populer_route @6                                    
-<00000000045E3F88>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-MOTEUR              make @9                                             
-<00000000045E3F88>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-APPLICATION         make @3                                             
-<00000000045E25F8>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-GAME2_APPLICATION   make @1                                             
-<00000000045E25A8>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-GAME2_APPLICATION   root's creation                                     
-<00000000045E25A8>                         Routine failure.              Exit
+RUN-TIME            root's set-up          Unexpected harmful signal (Segmentation violation):
+<0000000000000000>                         Eiffel run-time panic.        Bye
 -------------------------------------------------------------------------------
 
+frogger: dumping core to generate debugging information...
+[Execution recording] Error: rt_dbg_stack_value (dep=6, loc_type=0x1, loc_number=1) -> ERROR ip: type:0xF8000000 rt_type=0x80000000
+
+frogger: PANIC: Unexpected harmful signal (Segmentation violation) ...
+
 frogger: system execution failed.
-Following is the set of recorded exceptions:
+Following is the set of recorded exceptions.
+NB: The raised panic may have induced completely inconsistent information:
 
 -------------------------------------------------------------------------------
 Class / Object      Routine                Nature of exception           Effect
 -------------------------------------------------------------------------------
-ARRAYED_LIST        put @1                 writeable:                   
-<000000000465D118>  (From CHAIN)           Precondition violated.        Fail
--------------------------------------------------------------------------------
-MOTEUR              populer_route @6                                    
-<000000000465CF88>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-MOTEUR              make @9                                             
-<000000000465CF88>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-APPLICATION         make @3                                             
-<000000000465B5F8>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-GAME2_APPLICATION   make @1                                             
-<000000000465B5A8>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-GAME2_APPLICATION   root's creation                                     
-<000000000465B5A8>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-
-frogger: system execution failed.
-Following is the set of recorded exceptions:
-
--------------------------------------------------------------------------------
-Class / Object      Routine                Nature of exception           Effect
--------------------------------------------------------------------------------
-ARRAYED_LIST        put @1                 writeable:                   
-<000000000474D118>  (From CHAIN)           Precondition violated.        Fail
--------------------------------------------------------------------------------
-MOTEUR              populer_route @6                                    
-<000000000474CF88>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-MOTEUR              make @9                                             
-<000000000474CF88>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-APPLICATION         make @3                                             
-<000000000474B5F8>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-GAME2_APPLICATION   make @1                                             
-<000000000474B5A8>                         Routine failure.              Fail
--------------------------------------------------------------------------------
-GAME2_APPLICATION   root's creation                                     
-<000000000474B5A8>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-ARRAYED_LIST        put_i_th @3            index_large_enough:          
-<000000000474D118>                         Runtime check violated.       Exit
--------------------------------------------------------------------------------
-ARRAYED_LIST        put_i_th @3                                         
-<000000000474D118>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-ARRAYED_LIST        replace @3                                          
-<000000000474D118>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-ARRAYED_LIST        put @3                                              
-<000000000474D118>  (From CHAIN)           Routine failure.              Exit
--------------------------------------------------------------------------------
-MOTEUR              populer_route @6                                    
-<000000000474CF88>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-MOTEUR              make @9                                             
-<000000000474CF88>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-APPLICATION         make @3                                             
-<000000000474B5F8>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-GAME2_APPLICATION   make @1                                             
-<000000000474B5A8>                         Routine failure.              Exit
--------------------------------------------------------------------------------
-GAME2_APPLICATION   root's creation                                     
-<000000000474B5A8>                         Routine failure.              Exit
+RUN-TIME            root's set-up          Unexpected harmful signal (Segmentation violation):
+<0000000000000000>                         Eiffel run-time panic.        Bye
 -------------------------------------------------------------------------------

@@ -2,7 +2,6 @@ note
 	description: "Classe des tortues de frogger"
 	author: "Francis Croteau"
 	date: "2020-02-23"
-	revision: "2020-05-14"
 
 class
 	TORTUES
@@ -29,8 +28,22 @@ feature --attributs
 	--indique la direction prise par la tortue, vrai = de droite à gauche , faux = de gauche à droite
 	temps_etat:INTEGER_32
 	--itérateur du nombre de cycle de l'application durant lequel l'état actuelle est maintenue'
+	temps_anim:INTEGER_32
+	-- itérateur pour l'animation de nage de `current'
+	cycle_nage:BOOLEAN
+	--indique l'état de l'animation de la nage de `current'
 	etat:BOOLEAN
 	-- Indiquateur de l'état de la tortue vrai au-dessus de l'eau : faux en plongé
+	en_colision:BOOLEAN
+	--indique si  le `JOUEUR' est en collision avec `current'
+	sprite_1:STRING
+	--indique l'emplacement de l'image 1 de l'animation de `Current'
+	sprite_2:STRING
+	--indique l'emplacement de l'image 2 de l'animation de `Current'
+	sprite_3:STRING
+	--indique l'emplacement de l'image 3 de l'animation de `Current'
+	sprite_4:STRING
+	--indique l'emplacement de l'image 4 de l'animation de `Current'
 
 
 feature --INITIALIZE
@@ -41,14 +54,18 @@ feature --INITIALIZE
 		    l_image:IMG_IMAGE_FILE
 		do
 		    temps_etat := 60*3
+		    temps_anim := 60
+		    en_colision := false
+		    cycle_nage := true
 		    --s'attend a 60fps
 		    direction:= a_direction
 			set_delais
 			x:=a_x
 			y:=a_y
 			largeur:=15
-			longeur:=60
-			create l_image.make ("tortue1.png")
+			longeur:=20
+			set_sprites_direction
+			create l_image.make (sprite_1)
 			has_error := False
 			if l_image.is_openable then
 				l_image.open
@@ -83,17 +100,32 @@ feature --Implementation
 		    changement_etat(a_renderer)
 		end
 
+		set_sprites_direction
+		--place les emplacement des images pour les sprites selon la direction
+		do
+			if (not direction) then
+			    sprite_1 := "tortue1_G.png"
+			    sprite_2 := "tortue2_G.png"
+			    sprite_3 := "tortue3_G.png"
+			    sprite_4 := "tortue4_G.png"
+			else
+			    sprite_1 := "tortue1_D.png"
+			    sprite_2 := "tortue2_D.png"
+			    sprite_3 := "tortue3_D.png"
+			    sprite_4 := "tortue4_D.png"
+			end
+		end
+
 		changement_etat(a_renderer:GAME_RENDERER)
+		--change la texture de `current' selon son état d'animation et état de plongé
 		local
 			l_image:IMG_IMAGE_FILE
 		do
-			create l_image.make ("tortue1.png")
+			create l_image.make (sprite_1)
 		    if etat then
 		    	l_image := mettre_ajour_sprite_flotter
-		    	print("flotte %N")
 		    else
 		    	l_image := mettre_ajour_sprite_plonger
-		    	print("plonge %N")
 		    end
 		    if l_image.is_openable then
 				l_image.open
@@ -108,20 +140,37 @@ feature --Implementation
 		end
 
 	mettre_ajour_sprite_flotter: IMG_IMAGE_FILE
+	--change l_image selon la variable temp_etat
 	local
 	    l_image:IMG_IMAGE_FILE
+	    l_secondes:INTEGER_32
 	do
-		create l_image.make ("tortue1.png") -- image par defaut
+		create l_image.make (sprite_1) -- image par defaut
 	    --changement du sprite a l'état de plongé en 3 étape
+	    temps_anim := temps_anim - 1
+	    if (temps_anim <= 0) then
+	    	temps_anim := 60
+	    	cycle_nage := not cycle_nage
+	    end
 		if (temps_etat < 60*6 and temps_etat > 60*6-10)then
-			create l_image.make ("tortue4.png")
+			create l_image.make (sprite_4)
 		elseif (temps_etat < 60*6-10 and temps_etat > 60*6-20) then
-			create l_image.make ("tortue3.png")
+			create l_image.make (sprite_3)
 		elseif (temps_etat < 60*6-20 and temps_etat > 60*6-30) then
-			create l_image.make ("tortue2.png")
-		elseif (temps_etat < 60*6-30) then
-			create l_image.make ("tortue1.png")
+			create l_image.make (sprite_2)
+		elseif (temps_etat < 60*6-30 and temps_etat > 60*6-40) then
+			create l_image.make (sprite_1)
+		elseif (temps_etat < 60*6-40) then
+			l_secondes := temps_etat // 60
+			if ( cycle_nage) then
+			    create l_image.make (sprite_2)
+			else
+				create l_image.make (sprite_1)
+			end
+		elseif (temps_etat < 60) then
+		    create l_image.make (sprite_3)
 		end
+
 		Result := l_image
 	end
 
@@ -130,13 +179,11 @@ feature --Implementation
 	    l_image:IMG_IMAGE_FILE
 	do
 		--changement du sprite a l'état de plongé en 3 étape
-		create l_image.make ("tortue4.png") -- image par defaut
+		create l_image.make (sprite_4) -- image par defaut
 	    if (temps_etat < 60*2 and temps_etat > 60*2-10)then
-			create l_image.make ("tortue2.png")
-		elseif (temps_etat < 60*2-10 and temps_etat > 60*2-20) then
-		    create l_image.make ("tortue3.png")
-		elseif temps_etat < 60*2-20 then
-			create l_image.make ("tortue4.png")
+		    create l_image.make (sprite_3)
+		elseif temps_etat < 60*2-10 then
+			create l_image.make (sprite_4)
 		end
 		Result := l_image
 	end

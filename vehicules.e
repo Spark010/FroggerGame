@@ -2,10 +2,9 @@ note
 	description: "Class pour les voitures roulant sur la route"
 	author: "Francis Croteau"
 	date: "2020-02-22"
-	revision: "2020-04-21"
 
 class
-	VOITURES
+	VEHICULES
 inherit
 	ELEMENT_MOBILE
 	GAME_TEXTURE
@@ -14,7 +13,7 @@ inherit
 		end
 
 create
-    make_default
+    make
 
 feature --acces
 	x:INTEGER_32
@@ -33,9 +32,11 @@ feature --acces
 	--détermine le sprite et la longeur utiliser pour le véhicule.
 	--si le véhicule est une voiture c'est faux
 	--si le véhicule est vrai c'est un cammion
+	en_colision:BOOLEAN
+	--indique si `JOUEUR' est en colision avec `current'
 
 feature --make
-	make_default(a_x, a_y:INTEGER_32; a_direction, a_est_camion:BOOLEAN; a_renderer:GAME_RENDERER)
+	make(a_x, a_y:INTEGER_32; a_direction, a_est_camion:BOOLEAN; a_renderer:GAME_RENDERER)
 		--constructeur par défaut assigne les valeur par défaut au véhicule
 		local
 		    l_image:IMG_IMAGE_FILE
@@ -44,19 +45,28 @@ feature --make
 	   	    y := a_y
 	   	    est_camion:=a_est_camion
 	   	    direction:=a_direction
-	   	    if est_camion then
-	   	        --assigne sprite camion
-	   	        longeur:=55
-	   	        create l_image.make ("camion.png")
-	   	    else
-	   	        ---assigne sprite voiture
-	   	        longeur:=27
-	   	        create l_image.make ("voiture.png")
-	   	    end
 	   	    direction := a_direction
 	   	    largeur :=15
 	   	    set_delais
 	   	    has_error := False
+	   	    en_colision := false
+	   	    if est_camion then
+	   	        --assigne sprite camion
+	   	        longeur:=55
+	   	        if (direction) then
+	   	            create l_image.make ("camion_D.png")
+	   	        else
+	   	            create l_image.make ("camion_G.png")
+	   	        end
+	   	    else
+	   	        ---assigne sprite voiture
+	   	        longeur:=27
+	   	        if direction then
+	   	            create l_image.make ("voiture_D.png")
+	   	        else
+	   	            create l_image.make ("voiture_G.png")
+	   	        end
+	   	    end
 			if l_image.is_openable then
 				l_image.open
 				if l_image.is_open then
@@ -75,7 +85,6 @@ feature --Implements
     deplacer
     	--appele la fonction bouger de ELEMENT_MOBILE pour déplacer la voiture
 		do
-
 		    x:=bouger(x, direction)
 		end
 

@@ -2,7 +2,6 @@ note
 	description: "{PAYSAGE} est le font d'écran du jeux"
 	author: "Francis Croteau"
 	date: "2020-05-14"
-	revision: "$2020-05-14 12:08pm"
 
 class
 	PAYSAGE
